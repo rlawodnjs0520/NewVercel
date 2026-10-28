@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>하이포사이클로이드 시뮬레이터</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #F2F4F6;
+      color: #191F28;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .toss-card {
+      background: #FFFFFF;
+      border-radius: 24px;
+      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: #E5E8EB;
+      border-radius: 999px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #3182F6;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(49, 130, 246, 0.35);
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.08);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Minimal Toss-Style Header -->
+  <header class="bg-white/90 backdrop-blur sticky top-0 z-30 border-b border-[#E5E8EB]">
+    <div class="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-2.5">
+        <span class="text-lg font-bold tracking-tight text-[#191F28]">하이포사이클로이드</span>
+        <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#F2F4F6] text-[#4E5968]">
+          20705 김재원 보고서 제출용
+        </span>
+        <span id="badge-k-display" class="px-3 py-1 rounded-full text-xs font-semibold bg-[#E8F3FF] text-[#3182F6] font-mono">
+          k = 4.00 + 0.05i
+        </span>
+      </div>
+
+      <!-- Segmented Pill Navigation -->
+      <nav class="flex items-center gap-1 bg-[#F2F4F6] p-1 rounded-2xl">
+        <button id="nav-sim" type="button" class="px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition bg-white text-[#191F28] shadow-sm">
+          시뮬레이터
+        </button>
+        <button id="nav-compare" type="button" class="px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[#6B7684] hover:text-[#191F28]">
+          4분할 비교
+        </button>
+        <button id="nav-report" type="button" class="px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[#6B7684] hover:text-[#191F28]">
+          핵심 정리
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-5 py-6">
+
+    <!-- ==================== TAB 1: SIMULATOR ==================== -->
+    <section id="view-sim" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+      <!-- Left Controls Card -->
+      <div class="lg:col-span-4 toss-card p-6 space-y-6">
+        <!-- Real Part a -->
+        <div class="space-y-2.5">
+          <div class="flex justify-between items-center">
+            <label for="slider-a" class="text-sm font-bold text-[#191F28]">실수부 a <span class="text-xs font-normal text-[#8B95A1]">Re(k)</span></label>
+            <input id="input-a" type="number" step="0.01" min="-6" max="12" value="4" class="w-20 bg-[#F9FAFB] border border-[#E5E8EB] rounded-xl px-2.5 py-1.5 text-right font-mono text-sm font-semibold text-[#191F28] focus:outline-none focus:border-[#3182F6]">
+          </div>
+          <input id="slider-a" type="range" min="-4" max="10" step="0.01" value="4" class="w-full cursor-pointer">
+          <div class="flex flex-wrap gap-1.5 pt-0.5">
+            <button type="button" data-set-a="0" class="btn-quick-a px-2.5 py-1 text-xs rounded-lg bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-medium transition">a = 0</button>
+            <button type="button" data-set-a="3" class="btn-quick-a px-2.5 py-1 text-xs rounded-lg bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-medium transition">a = 3</button>
+            <button type="button" data-set-a="4" class="btn-quick-a px-2.5 py-1 text-xs rounded-lg bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-medium transition">a = 4</button>
+            <button type="button" data-set-a="2.5" class="btn-quick-a px-2.5 py-1 text-xs rounded-lg bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-medium transition">a = 5/2</button>
+            <button type="button" data-set-a="3.14159" class="btn-quick-a px-2.5 py-1 text-xs rounded-lg bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-medium transition">a = π</button>
+          </div>
+        </div>
+
+        <!-- Imaginary Part b -->
+        <div class="space-y-2.5 pt-4 border-t border-[#F2F4F6]">
+          <div class="flex justify-between items-center">
+            <label for="slider-b" class="text-sm font-bold text-[#191F28]">허수부 b <span class="text-xs font-normal text-[#8B95A1]">Im(k)</span></label>
+            <input id="input-b" type="number" step="0.005" min="-0.35" max="0.35" value="0.05" class="w-20 bg-[#F9FAFB] border border-[#E5E8EB] rounded-xl px-2.5 py-1.5 text-right font-mono text-sm font-semibold text-[#191F28] focus:outline-none focus:border-[#3182F6]">
+          </div>
+          <input id="slider-b" type="range" min="-0.25" max="0.25" step="0.005" value="0.05" class="w-full cursor-pointer">
+          <div class="flex flex-wrap gap-1.5 pt-0.5">
+            <button type="button" data-set-b="0" class="btn-quick-b px-2.5 py-1 text-xs rounded-lg bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-medium transition">b = 0</button>
+            <button type="button" data-set-b="0.02" class="btn-quick-b px-2.5 py-1 text-xs rounded-lg bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-medium transition">+0.02i</button>
+            <button type="button" data-set-b="0.05" class="btn-quick-b px-2.5 py-1 text-xs rounded-lg bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-medium transition">+0.05i</button>
+            <button type="button" data-set-b="0.12" class="btn-quick-b px-2.5 py-1 text-xs rounded-lg bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-medium transition">+0.12i</button>
+            <button type="button" data-set-b="-0.06" class="btn-quick-b px-2.5 py-1 text-xs rounded-lg bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-medium transition">-0.06i</button>
+          </div>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="space-y-2 pt-4 border-t border-[#F2F4F6]">
+          <div class="text-sm font-bold text-[#191F28]">대표 조건 바로가기</div>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" data-preset="real_int" class="btn-preset px-3 py-2.5 rounded-xl bg-[#F9FAFB] hover:bg-[#E8F3FF] hover:text-[#3182F6] text-left text-xs font-medium text-[#333D4B] transition">
+              정수 (k = 4)
+            </button>
+            <button type="button" data-preset="real_rat" class="btn-preset px-3 py-2.5 rounded-xl bg-[#F9FAFB] hover:bg-[#E8F3FF] hover:text-[#3182F6] text-left text-xs font-medium text-[#333D4B] transition">
+              유리수 (k = 5/2)
+            </button>
+            <button type="button" data-preset="real_irr" class="btn-preset px-3 py-2.5 rounded-xl bg-[#F9FAFB] hover:bg-[#E8F3FF] hover:text-[#3182F6] text-left text-xs font-medium text-[#333D4B] transition">
+              무리수 (k = π)
+            </button>
+            <button type="button" data-preset="pure_imag" class="btn-preset px-3 py-2.5 rounded-xl bg-[#F9FAFB] hover:bg-[#E8F3FF] hover:text-[#3182F6] text-left text-xs font-medium text-[#333D4B] transition">
+              순허수 (k = 0.12i)
+            </button>
+            <button type="button" data-preset="complex_pos" class="btn-preset px-3 py-2.5 rounded-xl bg-[#F9FAFB] hover:bg-[#E8F3FF] hover:text-[#3182F6] text-left text-xs font-medium text-[#333D4B] transition">
+              양의 허수 (4+0.05i)
+            </button>
+            <button type="button" data-preset="complex_neg" class="btn-preset px-3 py-2.5 rounded-xl bg-[#F9FAFB] hover:bg-[#E8F3FF] hover:text-[#3182F6] text-left text-xs font-medium text-[#333D4B] transition">
+              음의 허수 (4-0.06i)
+            </button>
+          </div>
+        </div>
+
+        <!-- Turns & Model -->
+        <div class="space-y-3 pt-4 border-t border-[#F2F4F6]">
+          <div class="flex justify-between items-center text-sm">
+            <label for="slider-turns" class="font-bold text-[#191F28]">회전 수</label>
+            <span class="text-xs font-semibold text-[#3182F6] font-mono"><span id="label-turns">3.0</span>바퀴 (<span id="label-rad">6.0π</span>)</span>
+          </div>
+          <input id="slider-turns" type="range" min="1" max="10" step="0.5" value="3" class="w-full cursor-pointer">
+
+          <div class="pt-1">
+            <label for="select-model" class="block text-xs font-semibold text-[#8B95A1] mb-1.5">수식 모델</label>
+            <select id="select-model" class="w-full bg-[#F9FAFB] border border-[#E5E8EB] rounded-xl px-3 py-2 text-xs font-medium text-[#191F28] focus:outline-none focus:border-[#3182F6]">
+              <option value="euler">복소평면 오일러 공식 z(θ)</option>
+              <option value="trig_re">삼각·쌍곡선함수 실수부 (Re)</option>
+              <option value="trig_both">실수부(Re) + 허수부(Im) 비교</option>
+            </select>
+          </div>
+
+          <div class="flex gap-2 pt-2">
+            <button id="btn-play" type="button" class="flex-1 py-2.5 px-4 rounded-xl bg-[#3182F6] hover:bg-[#1B64DA] text-white font-semibold text-xs transition">
+              일시정지
+            </button>
+            <button id="btn-restart" type="button" class="py-2.5 px-3.5 rounded-xl bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-semibold text-xs transition">
+              처음부터
+            </button>
+            <button id="btn-instant" type="button" class="py-2.5 px-3.5 rounded-xl bg-[#E8F3FF] hover:bg-[#D0E5FF] text-[#3182F6] font-semibold text-xs transition">
+              즉시 완성
+            </button>
+          </div>
+
+          <div class="flex items-center gap-4 pt-1 text-xs text-[#4E5968]">
+            <label class="inline-flex items-center gap-1.5 cursor-pointer">
+              <input id="chk-vectors" type="checkbox" checked class="rounded accent-[#3182F6]">
+              <span>회전 팔 표시</span>
+            </label>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer">
+              <input id="chk-envelope" type="checkbox" checked class="rounded accent-[#3182F6]">
+              <span>기준원 표시</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Canvas & Clean Summary -->
+      <div class="lg:col-span-8 space-y-4">
+        <!-- White Canvas Card -->
+        <div class="toss-card p-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <span id="canvas-title" class="text-sm font-bold text-[#191F28]">
+              z(θ) = (k - 1)e^(iθ) + e^(-i(k - 1)θ)
+            </span>
+            <div class="flex items-center gap-1.5">
+              <button id="btn-zoom-in" type="button" class="px-3 py-1.5 rounded-xl bg-[#F2F4F6] hover:bg-[#E5E8EB] text-xs font-semibold text-[#4E5968] transition">+</button>
+              <button id="btn-zoom-out" type="button" class="px-3 py-1.5 rounded-xl bg-[#F2F4F6] hover:bg-[#E5E8EB] text-xs font-semibold text-[#4E5968] transition">−</button>
+              <button id="btn-zoom-fit" type="button" class="px-3 py-1.5 rounded-xl bg-[#F2F4F6] hover:bg-[#E5E8EB] text-xs font-semibold text-[#4E5968] transition">맞춤</button>
+            </div>
+          </div>
+
+          <div class="relative w-full h-[400px] sm:h-[460px] rounded-2xl overflow-hidden border border-[#E5E8EB] bg-white">
+            <canvas id="sim-canvas" class="w-full h-full block"></canvas>
+            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl border border-[#E5E8EB] text-xs flex items-center gap-3 pointer-events-none">
+              <span class="inline-flex items-center gap-1.5 text-[#191F28] font-medium">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#3182F6] inline-block"></span>
+                <span id="legend-main">궤적</span>
+              </span>
+              <span id="legend-sub-row" class="inline-flex items-center gap-1.5 text-[#6B7684]">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#F04452] inline-block"></span>
+                <span id="legend-sub">회전 팔</span>
+              </span>
+            </div>
+            <div class="absolute bottom-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-xl border border-[#E5E8EB] text-xs font-mono text-[#4E5968] pointer-events-none">
+              θ = <span id="readout-theta" class="text-[#3182F6] font-bold">0.00π</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Minimal Stat Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="toss-card p-4">
+            <div class="text-xs font-medium text-[#8B95A1]">현재 k값</div>
+            <div id="stat-k" class="text-base font-bold font-mono text-[#191F28] mt-1">4.00 + 0.05i</div>
+            <div id="stat-k-abs" class="text-xs text-[#8B95A1] font-mono mt-0.5">|k-1| = 3.00</div>
+          </div>
+          <div class="toss-card p-4">
+            <div class="text-xs font-medium text-[#8B95A1]">실수부 (a)</div>
+            <div id="stat-role-a" class="text-base font-bold text-[#191F28] mt-1">4대칭</div>
+            <div id="stat-role-a-sub" class="text-xs text-[#8B95A1] mt-0.5">4개 첨점·루프</div>
+          </div>
+          <div class="toss-card p-4">
+            <div class="text-xs font-medium text-[#8B95A1]">1바퀴 반경 변화</div>
+            <div id="stat-growth" class="text-base font-bold font-mono text-[#3182F6] mt-1">×1.37배</div>
+            <div id="stat-growth-sub" class="text-xs text-[#8B95A1] font-mono mt-0.5">e^(2πb)</div>
+          </div>
+          <div class="toss-card p-4">
+            <div class="text-xs font-medium text-[#8B95A1]">원점 거리 |z|</div>
+            <div id="stat-radius" class="text-base font-bold font-mono text-[#191F28] mt-1">4.000</div>
+            <div id="stat-bounded" class="text-xs text-[#4E5968] mt-0.5">발산 나선</div>
+          </div>
+        </div>
+
+        <!-- Simple 1-line Note Card -->
+        <div class="toss-card px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <div id="insight-headline" class="text-sm font-bold text-[#191F28]">양의 허수부 (b &gt; 0)</div>
+            <p id="insight-body" class="text-xs text-[#4E5968] mt-0.5">
+              실수부 a=4의 대칭을 유지하면서 1바퀴마다 반지름이 e^(2πb)배씩 커지는 나선 형태입니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: 4-GRID COMPARISON ==================== -->
+    <section id="view-compare" class="hidden space-y-5">
+      <div class="toss-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-bold text-[#191F28]">조건별 개형 비교</h2>
+          <p class="text-xs text-[#8B95A1] mt-0.5">4가지 k값의 궤적을 나란히 비교합니다.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" data-theme="real_vs_imag" class="btn-comp-theme px-3.5 py-2 rounded-xl bg-[#E8F3FF] text-[#3182F6] font-semibold text-xs transition">
+            허수부 b 변화 비교
+          </button>
+          <button type="button" data-theme="pure_vs_mixed" class="btn-comp-theme px-3.5 py-2 rounded-xl bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-semibold text-xs transition">
+            복소수 형태 모음
+          </button>
+          <button type="button" data-theme="real_classes" class="btn-comp-theme px-3.5 py-2 rounded-xl bg-[#F2F4F6] hover:bg-[#E5E8EB] text-[#4E5968] font-semibold text-xs transition">
+            실수 범위 (정수·유리수·무리수)
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Slot 0 -->
+        <div class="toss-card p-5 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <span id="comp-title-0" class="text-sm font-bold text-[#191F28]">k = 4.00 + 0.00i</span>
+            <div class="flex items-center gap-1.5 text-xs">
+              <span class="text-[#8B95A1]">a</span>
+              <input id="comp-a-0" type="number" step="0.1" value="4" class="w-14 bg-[#F9FAFB] border border-[#E5E8EB] rounded-lg px-2 py-1 font-mono text-[#191F28]">
+              <span class="text-[#8B95A1]">b</span>
+              <input id="comp-b-0" type="number" step="0.01" value="0" class="w-16 bg-[#F9FAFB] border border-[#E5E8EB] rounded-lg px-2 py-1 font-mono text-[#191F28]">
+              <button type="button" data-load-slot="0" class="btn-load-sim px-2.5 py-1 rounded-lg bg-[#E8F3FF] text-[#3182F6] font-semibold text-xs">열기</button>
+            </div>
+          </div>
+          <div class="relative h-60 rounded-2xl overflow-hidden border border-[#E5E8EB] bg-white">
+            <canvas id="comp-canvas-0" class="w-full h-full block"></canvas>
+          </div>
+          <p id="comp-desc-0" class="text-xs text-[#6B7684]"></p>
+        </div>
+
+        <!-- Slot 1 -->
+        <div class="toss-card p-5 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <span id="comp-title-1" class="text-sm font-bold text-[#191F28]">k = 4.00 + 0.02i</span>
+            <div class="flex items-center gap-1.5 text-xs">
+              <span class="text-[#8B95A1]">a</span>
+              <input id="comp-a-1" type="number" step="0.1" value="4" class="w-14 bg-[#F9FAFB] border border-[#E5E8EB] rounded-lg px-2 py-1 font-mono text-[#191F28]">
+              <span class="text-[#8B95A1]">b</span>
+              <input id="comp-b-1" type="number" step="0.01" value="0.02" class="w-16 bg-[#F9FAFB] border border-[#E5E8EB] rounded-lg px-2 py-1 font-mono text-[#191F28]">
+              <button type="button" data-load-slot="1" class="btn-load-sim px-2.5 py-1 rounded-lg bg-[#E8F3FF] text-[#3182F6] font-semibold text-xs">열기</button>
+            </div>
+          </div>
+          <div class="relative h-60 rounded-2xl overflow-hidden border border-[#E5E8EB] bg-white">
+            <canvas id="comp-canvas-1" class="w-full h-full block"></canvas>
+          </div>
+          <p id="comp-desc-1" class="text-xs text-[#6B7684]"></p>
+        </div>
+
+        <!-- Slot 2 -->
+        <div class="toss-card p-5 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <span id="comp-title-2" class="text-sm font-bold text-[#191F28]">k = 4.00 + 0.05i</span>
+            <div class="flex items-center gap-1.5 text-xs">
+              <span class="text-[#8B95A1]">a</span>
+              <input id="comp-a-2" type="number" step="0.1" value="4" class="w-14 bg-[#F9FAFB] border border-[#E5E8EB] rounded-lg px-2 py-1 font-mono text-[#191F28]">
+              <span class="text-[#8B95A1]">b</span>
+              <input id="comp-b-2" type="number" step="0.01" value="0.05" class="w-16 bg-[#F9FAFB] border border-[#E5E8EB] rounded-lg px-2 py-1 font-mono text-[#191F28]">
+              <button type="button" data-load-slot="2" class="btn-load-sim px-2.5 py-1 rounded-lg bg-[#E8F3FF] text-[#3182F6] font-semibold text-xs">열기</button>
+            </div>
+          </div>
+          <div class="relative h-60 rounded-2xl overflow-hidden border border-[#E5E8EB] bg-white">
+            <canvas id="comp-canvas-2" class="w-full h-full block"></canvas>
+          </div>
+          <p id="comp-desc-2" class="text-xs text-[#6B7684]"></p>
+        </div>
+
+        <!-- Slot 3 -->
+        <div class="toss-card p-5 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <span id="comp-title-3" class="text-sm font-bold text-[#191F28]">k = 4.00 - 0.05i</span>
+            <div class="flex items-center gap-1.5 text-xs">
+              <span class="text-[#8B95A1]">a</span>
+              <input id="comp-a-3" type="number" step="0.1" value="4" class="w-14 bg-[#F9FAFB] border border-[#E5E8EB] rounded-lg px-2 py-1 font-mono text-[#191F28]">
+              <span class="text-[#8B95A1]">b</span>
+              <input id="comp-b-3" type="number" step="0.01" value="-0.05" class="w-16 bg-[#F9FAFB] border border-[#E5E8EB] rounded-lg px-2 py-1 font-mono text-[#191F28]">
+              <button type="button" data-load-slot="3" class="btn-load-sim px-2.5 py-1 rounded-lg bg-[#E8F3FF] text-[#3182F6] font-semibold text-xs">열기</button>
+            </div>
+          </div>
+          <div class="relative h-60 rounded-2xl overflow-hidden border border-[#E5E8EB] bg-white">
+            <canvas id="comp-canvas-3" class="w-full h-full block"></canvas>
+          </div>
+          <p id="comp-desc-3" class="text-xs text-[#6B7684]"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: SUMMARY ==================== -->
+    <section id="view-report" class="hidden space-y-4">
+      <div class="toss-card p-6 sm:p-8 space-y-6">
+        <div class="flex items-center justify-between gap-4 border-b border-[#F2F4F6] pb-4">
+          <h2 class="text-lg font-bold text-[#191F28]">탐구 핵심 정리</h2>
+          <button id="btn-copy-report" type="button" class="px-4 py-2 rounded-xl bg-[#3182F6] hover:bg-[#1B64DA] text-white font-semibold text-xs transition">
+            내용 복사
+          </button>
+        </div>
+
+        <div id="report-text-container" class="space-y-4 text-sm text-[#333D4B] leading-relaxed">
+          <div class="p-4 rounded-2xl bg-[#F9FAFB] space-y-1.5">
+            <div class="font-bold text-[#191F28]">1. 실수 범위 (k = R/r)</div>
+            <p class="text-xs sm:text-sm text-[#4E5968]">
+              • 정수 (k = 3, 4, ...): 1바퀴 공전 시 닫히며 k개의 뾰족점 형성<br>
+              • 유리수 (k = p/q): q바퀴 공전 시 닫히며 p개의 뾰족점이 교차 형성<br>
+              • 무리수 (k = π, ...): 닫히지 않고 반지름 R과 |R-2r| 사이 고리 영역을 채움
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-[#F9FAFB] space-y-1.5">
+            <div class="font-bold text-[#191F28]">2. 복소수 확장 수식 (k = a + bi)</div>
+            <p class="text-xs sm:text-sm font-mono text-[#3182F6]">
+              z(θ) = (k - 1)e^(iθ) + e^(-i(k - 1)θ) = (a - 1 + bi)e^(iθ) + e^(bθ)·e^(-i(a - 1)θ)
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-[#F9FAFB] space-y-1.5">
+            <div class="font-bold text-[#191F28]">3. 복소수 범위 시뮬레이션 결과</div>
+            <p class="text-xs sm:text-sm text-[#4E5968]">
+              • 순허수 (a = 0): 대칭 뾰족점 없이 바깥으로 커지는 지수 나선 형태<br>
+              • 양의 허수부 (b &gt; 0): 실수부 a의 꼭짓점 개수를 유지하며 1바퀴마다 e^(2πb)배씩 팽창<br>
+              • 음의 허수부 (b &lt; 0): 회전할수록 e^(bθ) 항이 0으로 수렴하여 반지름 |k - 1|인 원에 수렴
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast-msg" class="fixed bottom-6 right-6 px-4 py-3 rounded-2xl bg-[#191F28] text-white font-semibold text-xs shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-50">
+    복사되었습니다
+  </div>
+
+  <script>
+    const state = {
+      activeTab: 'sim',
+      a: 4.0,
+      b: 0.05,
+      model: 'euler',
+      maxTurns: 3.0,
+      currentTheta: 0,
+      isPlaying: true,
+      showVectors: true,
+      showEnvelope: true,
+      zoomFactor: 1.0,
+      animId: null,
+      compSlots: [
+        { a: 4.0, b: 0.0, turns: 2.0, desc: 'b = 0 (실수 정수): 닫힌 4첨점 아스트로이드' },
+        { a: 4.0, b: 0.02, turns: 2.5, desc: 'b = +0.02: 1바퀴당 1.13배 팽창' },
+        { a: 4.0, b: 0.05, turns: 2.5, desc: 'b = +0.05: 1바퀴당 1.37배 팽창' },
+        { a: 4.0, b: -0.05, turns: 3.5, desc: 'b = -0.05: 반지름 |k-1|≈3 원으로 수렴' }
+      ]
+    };
+
+    function evalPoint(a, b, theta, mode) {
+      const ar = a - 1;
+      const bi = b;
+
+      if (mode === 'euler') {
+        const cosT = Math.cos(theta);
+        const sinT = Math.sin(theta);
+        const x1 = ar * cosT - bi * sinT;
+        const y1 = ar * sinT + bi * cosT;
+
+        const expB = Math.exp(bi * theta);
+        const cosA = Math.cos(ar * theta);
+        const sinA = Math.sin(ar * theta);
+        const x2 = expB * cosA;
+        const y2 = -expB * sinA;
+
+        return { x: x1 + x2, y: y1 + y2, x1, y1, subX: null, subY: null };
+      } else {
+        const u = ar * theta;
+        const v = bi * theta;
+        const coshV = Math.cosh(v);
+        const sinhV = Math.sinh(v);
+        const cosU = Math.cos(u);
+        const sinU = Math.sin(u);
+
+        const reX = ar * Math.cos(theta) + cosU * coshV;
+        const imX = bi * Math.cos(theta) - sinU * sinhV;
+        const reY = ar * Math.sin(theta) - sinU * coshV;
+        const imY = bi * Math.sin(theta) - cosU * sinhV;
+
+        return {
+          x: reX,
+          y: reY,
+          x1: ar * Math.cos(theta),
+          y1: ar * Math.sin(theta),
+          subX: mode === 'trig_both' ? imX : null,
+          subY: mode === 'trig_both' ? imY : null
+        };
+      }
+    }
+
+    function formatComplex(a, b) {
+      const sign = b >= 0 ? '+' : '-';
+      return `${a.toFixed(2)} ${sign} ${Math.abs(b).toFixed(3)}i`;
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast-msg');
+      el.textContent = msg;
+      el.classList.remove('opacity-0');
+      el.classList.add('opacity-100');
+      setTimeout(() => {
+        el.classList.remove('opacity-100');
+        el.classList.add('opacity-0');
+      }, 2000);
+    }
+
+    function updateTelemetry() {
+      const a = state.a;
+      const b = state.b;
+      const km1Abs = Math.hypot(a - 1, b);
+      const growth = Math.exp(2 * Math.PI * b);
+
+      document.getElementById('badge-k-display').textContent = `k = ${formatComplex(a, b)}`;
+      document.getElementById('stat-k').textContent = formatComplex(a, b);
+      document.getElementById('stat-k-abs').textContent = `|k-1| = ${km1Abs.toFixed(2)}`;
+
+      let roleA = '';
+      let roleASub = '';
+      if (Math.abs(a) < 0.001) {
+        roleA = '순허수 (a = 0)';
+        roleASub = '첨점 없는 단일 나선';
+      } else if (Math.abs(a - Math.round(a)) < 0.001) {
+        const n = Math.round(a);
+        roleA = `정수 (a = ${n})`;
+        roleASub = `${Math.abs(n)}개 방향 대칭`;
+      } else if (Math.abs(a - Math.PI) < 0.01) {
+        roleA = '무리수 (a ≈ π)';
+        roleASub = '비주기 회전';
+      } else {
+        roleA = `실수 (a = ${a.toFixed(2)})`;
+        roleASub = '교차 회전 궤적';
+      }
+      document.getElementById('stat-role-a').textContent = roleA;
+      document.getElementById('stat-role-a-sub').textContent = roleASub;
+
+      document.getElementById('stat-growth').textContent = `×${growth.toFixed(2)}배`;
+      document.getElementById('stat-growth-sub').textContent = `e^(2πb)`;
+
+      const pt = evalPoint(a, b, state.currentTheta, state.model);
+      const curR = Math.hypot(pt.x, pt.y);
+      document.getElementById('stat-radius').textContent = curR.toFixed(2);
+      document.getElementById('readout-theta').textContent = `${(state.currentTheta / Math.PI).toFixed(2)}π`;
+
+      const boundedEl = document.getElementById('stat-bounded');
+      if (Math.abs(b) < 0.0005) {
+        boundedEl.textContent = '유계 (원 내부)';
+        boundedEl.className = 'text-xs text-[#3182F6] mt-0.5';
+      } else if (b > 0) {
+        boundedEl.textContent = '바깥쪽 발산 (b > 0)';
+        boundedEl.className = 'text-xs text-[#F04452] mt-0.5';
+      } else {
+        boundedEl.textContent = `반지름 ${km1Abs.toFixed(2)} 원 수렴`;
+        boundedEl.className = 'text-xs text-[#4E5968] mt-0.5';
+      }
+
+      const headlineEl = document.getElementById('insight-headline');
+      const bodyEl = document.getElementById('insight-body');
+
+      if (Math.abs(b) < 0.0005) {
+        headlineEl.textContent = '실수 범위 (b = 0)';
+        bodyEl.textContent = `반지름 ${Math.abs(a - 2).toFixed(2)}인 내접원과 반지름 ${Math.abs(a).toFixed(2)}인 외접원 사이에서 그려집니다.`;
+      } else if (Math.abs(a) < 0.001) {
+        headlineEl.textContent = `순허수 (k = ${b.toFixed(3)}i)`;
+        bodyEl.textContent = `실수부 대칭이 없어 뾰족점 없이 1바퀴마다 ${growth.toFixed(2)}배씩 변하는 지수 나선이 그려집니다.`;
+      } else if (b > 0) {
+        headlineEl.textContent = `양의 허수부 (k = ${formatComplex(a, b)})`;
+        bodyEl.textContent = `실수부 a = ${a.toFixed(2)}의 꼭짓점 개수를 유지하며 1바퀴마다 자전 반경이 ${growth.toFixed(2)}배씩 커집니다.`;
+      } else {
+        headlineEl.textContent = `음의 허수부 (k = ${formatComplex(a, b)})`;
+        bodyEl.textContent = `회전할수록 e^(bθ) 항이 0으로 줄어들어 반지름 |k-1| = ${km1Abs.toFixed(2)}인 원으로 수렴합니다.`;
+      }
+    }
+
+    function renderMainCanvas() {
+      const canvas = document.getElementById('sim-canvas');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      if (canvas.width !== Math.floor(rect.width * dpr) || canvas.height !== Math.floor(rect.height * dpr)) {
+        canvas.width = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+
+      const W = rect.width;
+      const H = rect.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const a = state.a;
+      const b = state.b;
+      const maxTheta = state.maxTurns * 2 * Math.PI;
+
+      const totalSteps = Math.max(600, Math.floor(state.maxTurns * 350));
+      let maxCoord = 1.5;
+      for (let i = 0; i <= totalSteps; i++) {
+        const th = (i / totalSteps) * maxTheta;
+        const p = evalPoint(a, b, th, state.model);
+        const rMain = Math.hypot(p.x, p.y);
+        if (rMain > maxCoord && isFinite(rMain)) maxCoord = rMain;
+        if (p.subX !== null) {
+          const rSub = Math.hypot(p.subX, p.subY);
+          if (rSub > maxCoord && isFinite(rSub)) maxCoord = rSub;
+        }
+      }
+
+      const baseScale = (Math.min(W, H) * 0.41) / Math.max(maxCoord, 0.5);
+      const scale = baseScale * state.zoomFactor;
+      const cx = W / 2;
+      const cy = H / 2;
+
+      // Clean light axes
+      ctx.strokeStyle = '#E5E8EB';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, cy);
+      ctx.lineTo(W, cy);
+      ctx.moveTo(cx, 0);
+      ctx.lineTo(cx, H);
+      ctx.stroke();
+
+      // Reference circles
+      if (state.showEnvelope) {
+        const km1 = Math.hypot(a - 1, b);
+        ctx.save();
+        ctx.strokeStyle = '#B0B8C1';
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, km1 * scale, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        if (Math.abs(b) < 0.0005) {
+          ctx.save();
+          ctx.strokeStyle = '#D1D6DB';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.arc(cx, cy, Math.abs(a) * scale, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // Faint full preview path
+      ctx.save();
+      ctx.strokeStyle = 'rgba(49, 130, 246, 0.14)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      for (let i = 0; i <= totalSteps; i++) {
+        const th = (i / totalSteps) * maxTheta;
+        const p = evalPoint(a, b, th, state.model);
+        const px = cx + p.x * scale;
+        const py = cy - p.y * scale;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      const activeRatio = Math.min(1, state.currentTheta / Math.max(0.0001, maxTheta));
+      const activeSteps = Math.max(2, Math.floor(totalSteps * activeRatio));
+
+      if (state.model === 'trig_both') {
+        ctx.save();
+        ctx.strokeStyle = '#F04452';
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        for (let i = 0; i <= activeSteps; i++) {
+          const th = (i / activeSteps) * state.currentTheta;
+          const p = evalPoint(a, b, th, state.model);
+          const px = cx + p.subX * scale;
+          const py = cy - p.subY * scale;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Main Toss Blue trajectory
+      ctx.save();
+      ctx.strokeStyle = '#3182F6';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= activeSteps; i++) {
+        const th = (i / activeSteps) * state.currentTheta;
+        const p = evalPoint(a, b, th, state.model);
+        const px = cx + p.x * scale;
+        const py = cy - p.y * scale;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      const curP = evalPoint(a, b, state.currentTheta, state.model);
+      const vx1 = cx + curP.x1 * scale;
+      const vy1 = cy - curP.y1 * scale;
+      const vx2 = cx + curP.x * scale;
+      const vy2 = cy - curP.y * scale;
+
+      if (state.showVectors) {
+        const arm2Len = Math.hypot(curP.x - curP.x1, curP.y - curP.y1);
+        ctx.save();
+        ctx.strokeStyle = 'rgba(240, 68, 82, 0.35)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.arc(vx1, vy1, arm2Len * scale, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#4E5968';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(vx1, vy1);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#F04452';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(vx1, vy1);
+        ctx.lineTo(vx2, vy2);
+        ctx.stroke();
+
+        ctx.fillStyle = '#4E5968';
+        ctx.beginPath();
+        ctx.arc(vx1, vy1, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      ctx.fillStyle = '#3182F6';
+      ctx.beginPath();
+      ctx.arc(vx2, vy2, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function renderComparisonGrid() {
+      for (let idx = 0; idx < 4; idx++) {
+        const slot = state.compSlots[idx];
+        const aIn = document.getElementById(`comp-a-${idx}`);
+        const bIn = document.getElementById(`comp-b-${idx}`);
+        if (aIn && bIn) {
+          slot.a = parseFloat(aIn.value) || 0;
+          slot.b = parseFloat(bIn.value) || 0;
+        }
+        const titleEl = document.getElementById(`comp-title-${idx}`);
+        const descEl = document.getElementById(`comp-desc-${idx}`);
+        const growth = Math.exp(2 * Math.PI * slot.b);
+        if (titleEl) {
+          titleEl.textContent = `k = ${formatComplex(slot.a, slot.b)}`;
+        }
+        if (descEl) {
+          descEl.textContent = slot.desc || `1바퀴당 ×${growth.toFixed(2)}배`;
+        }
+
+        const canvas = document.getElementById(`comp-canvas-${idx}`);
+        if (!canvas) continue;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) continue;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
+
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.scale(dpr, dpr);
+        const W = rect.width;
+        const H = rect.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const maxTheta = (slot.turns || 3.0) * 2 * Math.PI;
+        const steps = 1200;
+        let maxR = 1.5;
+        for (let i = 0; i <= steps; i++) {
+          const th = (i / steps) * maxTheta;
+          const p = evalPoint(slot.a, slot.b, th, 'euler');
+          const r = Math.hypot(p.x, p.y);
+          if (r > maxR && isFinite(r)) maxR = r;
+        }
+
+        const scale = (Math.min(W, H) * 0.40) / Math.max(maxR, 0.5);
+        const cx = W / 2;
+        const cy = H / 2;
+
+        ctx.strokeStyle = '#E5E8EB';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, cy); ctx.lineTo(W, cy);
+        ctx.moveTo(cx, 0); ctx.lineTo(cx, H);
+        ctx.stroke();
+
+        const km1 = Math.hypot(slot.a - 1, slot.b);
+        ctx.strokeStyle = '#B0B8C1';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.arc(cx, cy, km1 * scale, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.strokeStyle = '#3182F6';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const th = (i / steps) * maxTheta;
+          const p = evalPoint(slot.a, slot.b, th, 'euler');
+          const px = cx + p.x * scale;
+          const py = cy - p.y * scale;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    function tick() {
+      if (state.activeTab === 'sim' && state.isPlaying) {
+        const maxTheta = state.maxTurns * 2 * Math.PI;
+        const step = maxTheta / 320;
+        state.currentTheta += step;
+        if (state.currentTheta >= maxTheta) {
+          state.currentTheta = maxTheta;
+          state.isPlaying = false;
+          document.getElementById('btn-play').textContent = '다시 재생';
+        }
+        updateTelemetry();
+        renderMainCanvas();
+      }
+      state.animId = requestAnimationFrame(tick);
+    }
+
+    function syncInputsFromState(restartAnim = false) {
+      document.getElementById('slider-a').value = state.a;
+      document.getElementById('input-a').value = state.a;
+      document.getElementById('slider-b').value = state.b;
+      document.getElementById('input-b').value = state.b;
+      document.getElementById('slider-turns').value = state.maxTurns;
+      document.getElementById('label-turns').textContent = state.maxTurns.toFixed(1);
+      document.getElementById('label-rad').textContent = `${(state.maxTurns * 2).toFixed(1)}π`;
+
+      if (restartAnim) {
+        state.currentTheta = 0;
+        state.isPlaying = true;
+        document.getElementById('btn-play').textContent = '일시정지';
+      } else {
+        state.currentTheta = state.maxTurns * 2 * Math.PI;
+      }
+      updateTelemetry();
+      renderMainCanvas();
+    }
+
+    function switchTab(tab) {
+      state.activeTab = tab;
+      const views = {
+        sim: document.getElementById('view-sim'),
+        compare: document.getElementById('view-compare'),
+        report: document.getElementById('view-report')
+      };
+      const navs = {
+        sim: document.getElementById('nav-sim'),
+        compare: document.getElementById('nav-compare'),
+        report: document.getElementById('nav-report')
+      };
+
+      Object.keys(views).forEach((k) => {
+        if (k === tab) {
+          views[k].classList.remove('hidden');
+          navs[k].className = 'px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition bg-white text-[#191F28] shadow-sm';
+        } else {
+          views[k].classList.add('hidden');
+          navs[k].className = 'px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[#6B7684] hover:text-[#191F28]';
+        }
+      });
+
+      if (tab === 'sim') renderMainCanvas();
+      else if (tab === 'compare') renderComparisonGrid();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('nav-sim').addEventListener('click', () => switchTab('sim'));
+      document.getElementById('nav-compare').addEventListener('click', () => switchTab('compare'));
+      document.getElementById('nav-report').addEventListener('click', () => switchTab('report'));
+
+      document.getElementById('slider-a').addEventListener('input', (e) => {
+        state.a = parseFloat(e.target.value) || 0;
+        document.getElementById('input-a').value = state.a;
+        state.currentTheta = state.maxTurns * 2 * Math.PI;
+        updateTelemetry();
+        renderMainCanvas();
+      });
+      document.getElementById('input-a').addEventListener('change', (e) => {
+        state.a = Math.max(-12, Math.min(20, parseFloat(e.target.value) || 0));
+        syncInputsFromState(false);
+      });
+      document.querySelectorAll('.btn-quick-a').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.a = parseFloat(btn.getAttribute('data-set-a'));
+          syncInputsFromState(true);
+        });
+      });
+
+      document.getElementById('slider-b').addEventListener('input', (e) => {
+        state.b = parseFloat(e.target.value) || 0;
+        document.getElementById('input-b').value = state.b;
+        state.currentTheta = state.maxTurns * 2 * Math.PI;
+        updateTelemetry();
+        renderMainCanvas();
+      });
+      document.getElementById('input-b').addEventListener('change', (e) => {
+        state.b = Math.max(-0.5, Math.min(0.5, parseFloat(e.target.value) || 0));
+        syncInputsFromState(false);
+      });
+      document.querySelectorAll('.btn-quick-b').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.b = parseFloat(btn.getAttribute('data-set-b'));
+          syncInputsFromState(true);
+        });
+      });
+
+      document.getElementById('select-model').addEventListener('change', (e) => {
+        state.model = e.target.value;
+        const titleMap = {
+          euler: 'z(θ) = (k - 1)e^(iθ) + e^(-i(k - 1)θ)',
+          trig_re: '삼각·쌍곡선함수 실수부 (Re(x), Re(y))',
+          trig_both: '실수부(파란선) · 허수부(빨간 점선)'
+        };
+        document.getElementById('canvas-title').textContent = titleMap[state.model];
+        document.getElementById('legend-sub').textContent =
+          state.model === 'trig_both' ? '허수부 (Im)' : '회전 팔';
+        updateTelemetry();
+        renderMainCanvas();
+      });
+
+      const presets = {
+        real_int: { a: 4.0, b: 0.0, turns: 1.0 },
+        real_rat: { a: 2.5, b: 0.0, turns: 2.0 },
+        real_irr: { a: 3.14159, b: 0.0, turns: 8.0 },
+        pure_imag: { a: 0.0, b: 0.12, turns: 2.5 },
+        complex_pos: { a: 4.0, b: 0.05, turns: 3.0 },
+        complex_neg: { a: 4.0, b: -0.06, turns: 4.0 }
+      };
+      document.querySelectorAll('.btn-preset').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const p = presets[btn.getAttribute('data-preset')];
+          if (!p) return;
+          state.a = p.a;
+          state.b = p.b;
+          state.maxTurns = p.turns;
+          state.zoomFactor = 1.0;
+          syncInputsFromState(true);
+        });
+      });
+
+      document.getElementById('slider-turns').addEventListener('input', (e) => {
+        state.maxTurns = parseFloat(e.target.value) || 3.0;
+        document.getElementById('label-turns').textContent = state.maxTurns.toFixed(1);
+        document.getElementById('label-rad').textContent = `${(state.maxTurns * 2).toFixed(1)}π`;
+        state.currentTheta = state.maxTurns * 2 * Math.PI;
+        updateTelemetry();
+        renderMainCanvas();
+      });
+
+      document.getElementById('btn-play').addEventListener('click', () => {
+        const maxTheta = state.maxTurns * 2 * Math.PI;
+        if (state.currentTheta >= maxTheta - 0.01) {
+          state.currentTheta = 0;
+          state.isPlaying = true;
+          document.getElementById('btn-play').textContent = '일시정지';
+        } else {
+          state.isPlaying = !state.isPlaying;
+          document.getElementById('btn-play').textContent = state.isPlaying ? '일시정지' : '재생';
+        }
+      });
+      document.getElementById('btn-restart').addEventListener('click', () => {
+        state.currentTheta = 0;
+        state.isPlaying = true;
+        document.getElementById('btn-play').textContent = '일시정지';
+      });
+      document.getElementById('btn-instant').addEventListener('click', () => {
+        state.isPlaying = false;
+        state.currentTheta = state.maxTurns * 2 * Math.PI;
+        document.getElementById('btn-play').textContent = '다시 재생';
+        updateTelemetry();
+        renderMainCanvas();
+      });
+
+      document.getElementById('chk-vectors').addEventListener('change', (e) => {
+        state.showVectors = e.target.checked;
+        renderMainCanvas();
+      });
+      document.getElementById('chk-envelope').addEventListener('change', (e) => {
+        state.showEnvelope = e.target.checked;
+        renderMainCanvas();
+      });
+
+      document.getElementById('btn-zoom-in').addEventListener('click', () => {
+        state.zoomFactor = Math.min(4.0, state.zoomFactor * 1.25);
+        renderMainCanvas();
+      });
+      document.getElementById('btn-zoom-out').addEventListener('click', () => {
+        state.zoomFactor = Math.max(0.25, state.zoomFactor / 1.25);
+        renderMainCanvas();
+      });
+      document.getElementById('btn-zoom-fit').addEventListener('click', () => {
+        state.zoomFactor = 1.0;
+        renderMainCanvas();
+      });
+
+      const themes = {
+        real_vs_imag: [
+          { a: 4.0, b: 0.0, turns: 2.0, desc: 'b = 0: 닫힌 4첨점 아스트로이드' },
+          { a: 4.0, b: 0.02, turns: 2.5, desc: 'b = +0.02: 1바퀴당 1.13배 팽창' },
+          { a: 4.0, b: 0.05, turns: 2.5, desc: 'b = +0.05: 1바퀴당 1.37배 팽창' },
+          { a: 4.0, b: -0.05, turns: 3.5, desc: 'b = -0.05: 반지름 |k-1|≈3 원 수렴' }
+        ],
+        pure_vs_mixed: [
+          { a: 0.0, b: 0.12, turns: 2.0, desc: 'k = 0.12i (순허수): 단일 팽창 나선' },
+          { a: 3.0, b: 0.05, turns: 2.5, desc: 'k = 3 + 0.05i: 3대칭 발산 나선' },
+          { a: 2.5, b: 0.04, turns: 3.0, desc: 'k = 2.5 + 0.04i: 별 모양 팽창 나선' },
+          { a: 5.0, b: -0.06, turns: 4.0, desc: 'k = 5 - 0.06i: 반지름 4 원으로 수렴' }
+        ],
+        real_classes: [
+          { a: 3.0, b: 0.0, turns: 1.0, desc: '정수 k = 3 (델토이드)' },
+          { a: 4.0, b: 0.0, turns: 1.0, desc: '정수 k = 4 (아스트로이드)' },
+          { a: 2.5, b: 0.0, turns: 2.0, desc: '유리수 k = 5/2 (2바퀴 닫힘)' },
+          { a: 3.14159, b: 0.0, turns: 8.0, desc: '무리수 k = π (고리 채움)' }
+        ]
+      };
+
+      document.querySelectorAll('.btn-comp-theme').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const t = themes[btn.getAttribute('data-theme')];
+          if (!t) return;
+          t.forEach((slot, i) => {
+            state.compSlots[i] = { ...slot };
+            document.getElementById(`comp-a-${i}`).value = slot.a;
+            document.getElementById(`comp-b-${i}`).value = slot.b;
+          });
+          renderComparisonGrid();
+        });
+      });
+
+      for (let i = 0; i < 4; i++) {
+        document.getElementById(`comp-a-${i}`).addEventListener('input', () => {
+          state.compSlots[i].desc = '';
+          renderComparisonGrid();
+        });
+        document.getElementById(`comp-b-${i}`).addEventListener('input', () => {
+          state.compSlots[i].desc = '';
+          renderComparisonGrid();
+        });
+      }
+
+      document.querySelectorAll('.btn-load-sim').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-load-slot'), 10);
+          const slot = state.compSlots[idx];
+          state.a = slot.a;
+          state.b = slot.b;
+          state.maxTurns = slot.turns || 3.0;
+          switchTab('sim');
+          syncInputsFromState(true);
+          showToast(`k = ${formatComplex(slot.a, slot.b)} 적용됨`);
+        });
+      });
+
+      document.getElementById('btn-copy-report').addEventListener('click', () => {
+        const text = document.getElementById('report-text-container').innerText;
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast('복사되었습니다');
+        } catch (err) {
+          showToast('복사 실패');
+        }
+        document.body.removeChild(ta);
+      });
+
+      window.addEventListener('resize', () => {
+        if (state.activeTab === 'sim') renderMainCanvas();
+        else if (state.activeTab === 'compare') renderComparisonGrid();
+      });
+
+      syncInputsFromState(true);
+      if (state.animId) cancelAnimationFrame(state.animId);
+      state.animId = requestAnimationFrame(tick);
+    });
+  </script>
+</body>
+</html>
